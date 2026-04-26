@@ -1,43 +1,110 @@
-# Hello World Web App
+# Multi-App Repository
 
-A simple Node.js Express web application that is built into a Docker image and pushed to Docker Hub using GitHub Actions.
+A monorepo containing Node.js and Python applications, built into Docker images and pushed to Docker Hub using GitHub Actions.
 
-## Files included
+## Project Structure
 
-- `app.js` - Express HTTP server
-- `package.json` - dependencies and start script
-- `Dockerfile` - container definition
-- `.dockerignore` - ignore files for Docker build
-- `.github/workflows/docker-publish.yml` - GitHub Actions workflow to build and push the image
+```
+├── apps/
+│   ├── node-app/           # Node.js Express app
+│   │   ├── config/         # App config
+│   │   ├── src/            # Source code
+│   │   ├── tests/          # Unit tests
+│   │   ├── scripts/        # Build scripts
+│   │   ├── Dockerfile      # Node app container
+│   │   ├── package.json    # Dependencies
+│   │   └── .dockerignore
+│   └── python-app/         # Python Flask app
+│       ├── app.py          # Flask app
+│       ├── requirements.txt # Python deps
+│       ├── Dockerfile      # Python app container
+│       └── .gitignore
+├── environments/           # Environment configs
+│   ├── dev.json
+│   ├── staging.json
+│   └── prod.json
+├── docs/                   # Documentation
+├── .github/workflows/      # CI/CD pipelines
+├── .gitignore
+├── .dockerignore
+└── README.md
+```
+
+## Applications
+
+1. **Node.js App** (`apps/node-app/`): Express server with multiple routes
+   - `/` - Hello World
+   - `/api` - API endpoints
+   - `/status` - Health check
+
+2. **Python App** (`apps/python-app/`): Flask server
+   - `/` - Hello World
+
+## Environments
+
+- `dev.json` - Development settings
+- `staging.json` - Staging settings
+- `prod.json` - Production settings
 
 ## Run locally
 
+### Node.js App
 ```bash
+cd apps/node-app
 npm install
 npm start
 ```
+Open http://localhost:3000
 
-Open http://localhost:3000 in your browser.
+### Python App
+```bash
+cd apps/python-app
+pip install -r requirements.txt
+python app.py
+```
+Open http://localhost:5000
+
+## Development
+
+### Node.js
+```bash
+cd apps/node-app
+npm run dev  # Auto-reload
+npm test     # Run tests
+```
 
 ## Build with Docker locally
 
+### Node.js
 ```bash
-docker build -t hello-world-web .
-docker run -p 3000:3000 hello-world-web
+cd apps/node-app
+docker build -t node-app .
+docker run -p 3000:3000 node-app
 ```
 
-## GitHub Actions Docker push
+### Python
+```bash
+cd apps/python-app
+docker build -t python-app .
+docker run -p 5000:5000 python-app
+```
 
-This workflow pushes the Docker image to Docker Hub on every push to `main` or `master`.
+## Versioning
 
-### Required GitHub secrets
+Each app has a `VERSION` file that defines the Docker image version:
 
-Set the following repository secrets:
+- `apps/node-app/VERSION` - Node app version
+- `apps/python-app/VERSION` - Python app version
 
-- `DOCKERHUB_USERNAME`
-- `DOCKERHUB_TOKEN`
+When you update the source code, update the VERSION file:
 
-The image is pushed as:
+```
+1.0.0 → 1.0.1 (patch)
+1.0.0 → 1.1.0 (minor)
+1.0.0 → 2.0.0 (major)
+```
 
-- `docker.io/${{ secrets.DOCKERHUB_USERNAME }}/hello-world-web:latest`
-- `docker.io/${{ secrets.DOCKERHUB_USERNAME }}/hello-world-web:${{ github.sha }}`
+Push to `main`/`master` and the workflow will build and tag images with:
+- `latest` - Latest version
+- `v1.0.0` - Specific version
+- `<commit-sha>` - Git commit hash
