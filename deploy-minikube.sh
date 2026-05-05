@@ -41,24 +41,24 @@ kubectl apply -f k8s/service.yaml
 
 # Wait for deployment to be ready
 echo -e "${BLUE}Waiting for deployment to be ready...${NC}"
-kubectl rollout status deployment/python-flask-app -n default --timeout=300s
+kubectl rollout status deployment/python-flask-app -n python-app --timeout=300s
 
 # Get service information
 echo -e "${GREEN}=== Deployment Successful ===${NC}"
 echo -e "${BLUE}Service Information:${NC}"
-kubectl get service python-flask-app-service -n default
+kubectl get service python-flask-app-service -n python-app
 
 # Get Minikube service URL
 echo -e "${BLUE}Getting service URL...${NC}"
-SERVICE_URL=$(minikube service python-flask-app-service -n default --url)
+SERVICE_URL=$(minikube service python-flask-app-service -n python-app --url)
 echo -e "${GREEN}Application URL: ${SERVICE_URL}${NC}"
 
 # Display pod information
 echo -e "${BLUE}Pod Information:${NC}"
-kubectl get pods -n default -l app=python-flask-app
+kubectl get pods -n python-app -l app=python-flask-app
 
 # Display deployment information
 echo -e "${BLUE}Deployment Information:${NC}"
-kubectl get deployment python-flask-app -n default
+kubectl get deployment python-flask-app -n python-app
 
 echo -e "${GREEN}Deployment complete! Access the app at: ${SERVICE_URL}${NC}"

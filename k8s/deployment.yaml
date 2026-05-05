@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: python-flask-app
-  namespace: default
+  namespace: python-app
   labels:
     app: python-flask-app
     version: v1

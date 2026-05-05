@@ -1,0 +1,54 @@
+name: Deploy to Minikube
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Minikube
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+          kubectl version --client
+
+      - name: Install Minikube
+        run: |
+          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          sudo install minikube-linux-amd64 /usr/local/bin/minikube
+          minikube version
+
+      - name: Start Minikube
+        run: |
+          sudo minikube start --driver=docker --memory=4096 --cpus=2
+          minikube status
+
+      - name: Build Docker image in Minikube
+        run: |
+          eval "$(minikube docker-env)"
+          docker build -t python-app:latest .
+
+      - name: Deploy application to Minikube
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl rollout status deployment/python-flask-app -n python-app --timeout=300s
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -n python-app
+          kubectl get service python-flask-app-service -n python-app
+          SERVICE_URL=$(minikube service python-flask-app-service -n python-app --url)
+          echo "Service URL: ${SERVICE_URL}"
+          curl --fail "${SERVICE_URL}"

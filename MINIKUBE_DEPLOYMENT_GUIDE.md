@@ -279,6 +279,8 @@ The repository includes a GitHub Actions workflow (`.github/workflows/deploy-min
 6. Tests the application
 7. Displays logs and pod information
 
+The repository also includes a Docker image publish workflow (`.github/workflows/docker-publish.yml`) for building and pushing the app image to Docker Hub.
+
 ### Running the Workflow
 The workflow runs automatically on push, or manually via GitHub Actions tab:
 ```
